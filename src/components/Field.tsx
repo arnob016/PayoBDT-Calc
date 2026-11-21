@@ -37,6 +37,7 @@ export function LabelRow({
   htmlFor,
   className = '',
   right,
+  compact = false,
 }: {
   text: string
   hint: string
@@ -44,6 +45,8 @@ export function LabelRow({
   className?: string
   /** e.g. the + Profit / − Loss toggle, pinned to the end of the row */
   right?: ReactNode
+  /** slightly smaller label (fields that also carry a sign toggle in the same row) */
+  compact?: boolean
 }) {
   const tipId = useId()
   const [open, setOpen] = useState(false)
@@ -68,7 +71,7 @@ export function LabelRow({
     <div ref={ref} className="relative flex min-h-6 items-center justify-between gap-2">
       {/* the hover group is only label + "?", so hovering the toggle does not open the tooltip */}
       <div className="group/tip flex min-w-0 items-center gap-1">
-        <Text htmlFor={htmlFor} title={text} className={`text-sm font-medium leading-4 lg:truncate lg:text-xs ${className}`}>
+        <Text htmlFor={htmlFor} title={text} className={`text-sm font-medium leading-4 lg:truncate ${compact ? 'lg:text-[11px]' : 'lg:text-xs'} ${className}`}>
           {text}
         </Text>
         <button
@@ -138,6 +141,7 @@ export function Field({
         text={meta.label}
         hint={meta.hint}
         htmlFor={inputId}
+        compact={Boolean(sign)}
         right={sign && onSign ? <SignToggle label={meta.label} value={sign} onChange={onSign} /> : undefined}
       />
 

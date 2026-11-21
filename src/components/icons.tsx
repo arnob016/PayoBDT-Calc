@@ -81,8 +81,8 @@ export function LogoMark({ size = 32 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
       <rect width="32" height="32" rx="9" className="fill-accent" />
-      <path d="M9 12h12m0 0-3-3m3 3-3 3" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      <path d="M23 20H11m0 0 3-3m-3 3 3 3" stroke="#fff" strokeOpacity=".7" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M9 12h12m0 0-3-3m3 3-3 3" stroke="var(--accent-contrast)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M23 20H11m0 0 3-3m-3 3 3 3" stroke="var(--accent-contrast)" strokeOpacity=".7" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
     </svg>
   )
 }

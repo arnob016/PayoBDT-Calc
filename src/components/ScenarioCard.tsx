@@ -1,6 +1,7 @@
 import { resultAt, scenarioBreakdown, type Inputs } from '../lib/calc'
 import { fmt, pctSigned, taka, takaSigned } from '../lib/format'
 import type { WhatIf } from '../lib/whatif'
+import { Glyph } from './Glyph'
 import { toneOf, type Tone } from './ResultsHero'
 
 const TONE_TEXT: Record<Tone, string> = { pos: 'text-pos', neg: 'text-neg', neutral: 'text-ink' }
@@ -75,7 +76,8 @@ export function ScenarioCard({
             Sell {taka(scenario.sellRate, 2)} · Buy {fmt(scenario.buyRate, 3)} Payo/USDT
           </h2>
           <div className="flex items-baseline gap-2 whitespace-nowrap" aria-live="polite">
-            <span className={`text-xl font-bold leading-7 tracking-tight tabular-nums ${TONE_TEXT[tone]}`}>
+            <span className={`num text-xl font-bold leading-7 tracking-tight tabular-nums ${TONE_TEXT[tone]}`}>
+              <Glyph value={r.profitBdt} />
               {takaSigned(r.profitBdt)}
             </span>
             <span className={`rounded-md border px-1.5 py-0.5 text-xs font-semibold ${CHIP[tone]}`}>
@@ -99,7 +101,7 @@ export function ScenarioCard({
             type="button"
             disabled={!changed}
             onClick={onApply}
-            className="t-fast h-6 rounded-lg bg-accent px-2 text-[11px] font-semibold text-white hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-45"
+            className="t-fast h-6 rounded-lg bg-accent px-2 text-[11px] font-semibold text-accent-contrast hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-45"
           >
             Apply to inputs
           </button>

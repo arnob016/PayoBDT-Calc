@@ -1,36 +1,40 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
+import {
+  isThemeId,
+  readStoredTheme,
+  resolveInitialTheme,
+  THEMES,
+  writeStoredTheme,
+  type ThemeId,
+} from '../lib/theme'
+import { loadThemeFonts } from '../lib/themeFonts'
 
-type Theme = 'light' | 'dark'
-const KEY = 'payoneer-theme'
-
-const systemTheme = (): Theme =>
-  matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-
-function initial(): Theme {
+const safeStorage = () => {
   try {
-    const t = localStorage.getItem(KEY)
-    if (t === 'light' || t === 'dark') return t
+    return window.localStorage
   } catch {
-    /* ignore */
+    return undefined
   }
-  return systemTheme()
+}
+
+const prefersDark = () => matchMedia('(prefers-color-scheme: dark)').matches
+
+/** Apply a theme to <html>: tokens come from `html[data-theme=...]` in themes.css. */
+function applyTheme(id: ThemeId) {
+  const root = document.documentElement
+  root.dataset.theme = id
+  root.classList.toggle('dark', id !== 'light' && id !== 'trainer')
+  void loadThemeFonts(id)
+  window.dispatchEvent(new Event('themechange'))
 }
 
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(initial)
-  const [manual, setManual] = useState(() => {
-    try {
-      return localStorage.getItem(KEY) !== null
-    } catch {
-      return false
-    }
-  })
+  const [theme, setTheme] = useState<ThemeId>(() => resolveInitialTheme(readStoredTheme(safeStorage()), prefersDark()))
+  // Until the user picks a theme explicitly we keep following the OS (light or dark).
+  const [manual, setManual] = useState(() => readStoredTheme(safeStorage()) !== null)
 
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark')
-  }, [theme])
+  useEffect(() => applyTheme(theme), [theme])
 
-  // Follow the OS until the user picks a theme explicitly.
   useEffect(() => {
     if (manual) return
     const mq = matchMedia('(prefers-color-scheme: dark)')
@@ -39,16 +43,28 @@ export function useTheme() {
     return () => mq.removeEventListener('change', on)
   }, [manual])
 
-  const toggle = useCallback(() => {
-    const next: Theme = theme === 'dark' ? 'light' : 'dark'
-    setTheme(next)
+  const choose = useCallback((id: ThemeId) => {
+    setTheme(id)
     setManual(true)
-    try {
-      localStorage.setItem(KEY, next)
-    } catch {
-      /* ignore */
-    }
-  }, [theme])
+    writeStoredTheme(safeStorage(), id)
+  }, [])
 
-  return { theme, toggle }
+  return { theme, choose }
 }
+
+/** The active theme id, for SVG charts that draw differently per theme. */
+export function useThemeId(): ThemeId {
+  return useSyncExternalStore(
+    (cb) => {
+      window.addEventListener('themechange', cb)
+      return () => window.removeEventListener('themechange', cb)
+    },
+    () => {
+      const v = document.documentElement.dataset.theme
+      return isThemeId(v) ? v : 'light'
+    },
+    () => 'light' as ThemeId,
+  )
+}
+
+export const useChartStyle = () => THEMES[useThemeId()].chart

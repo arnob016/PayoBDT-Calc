@@ -3,6 +3,8 @@ import { breakEvenBuyRate, breakEvenSellRate, profitAt, type Inputs } from '../l
 import { fmt, taka, takaSigned } from '../lib/format'
 import { snap, SWEEP_STEP, type SweepKind } from '../lib/sweep'
 import type { Range } from '../lib/whatif'
+import { useChartStyle } from '../hooks/useTheme'
+import { Glyph } from './Glyph'
 
 const M = { l: 52, r: 14, t: 12, b: 26 }
 const THUMB = 24
@@ -77,6 +79,7 @@ export function SweepChart({
   fill: boolean
 }) {
   const cfg = CFG[kind]
+  const cs = useChartStyle() // how this theme draws charts (colours always come from tokens)
   const step = SWEEP_STEP[kind]
   const { lo, hi } = range
   const uid = useId().replace(/:/g, '')
@@ -135,8 +138,17 @@ export function SweepChart({
   const y0 = y(0)
   const frac = (v: number) => Math.min(1, Math.max(0, (v - lo) / (hi - lo)))
 
-  const toPath = (ps: number[]) =>
-    ps.map((p, i) => `${i ? 'L' : 'M'}${x(curves.xs[i]).toFixed(1)},${y(p).toFixed(1)}`).join('')
+  // Adventure draws a coarse step-after line (every STEP_EVERY-th sample); other themes draw the smooth curve
+  const STEP_EVERY = 4
+  const toPath = (ps: number[]) => {
+    if (!cs.stepped) return ps.map((p, i) => `${i ? 'L' : 'M'}${x(curves.xs[i]).toFixed(1)},${y(p).toFixed(1)}`).join('')
+    const idx = ps.map((_, i) => i).filter((i) => i % STEP_EVERY === 0 || i === ps.length - 1)
+    let d = `M${x(curves.xs[0]).toFixed(1)},${y(ps[0]).toFixed(1)}`
+    for (let k = 1; k < idx.length; k++) {
+      d += `H${x(curves.xs[idx[k]]).toFixed(1)}V${y(ps[idx[k]]).toFixed(1)}`
+    }
+    return d
+  }
   const line = toPath(curves.now)
   const baseLine = toPath(curves.base)
   const area = `${line}L${x(hi).toFixed(1)},${y0.toFixed(1)}L${x(lo).toFixed(1)},${y0.toFixed(1)}Z`
@@ -228,7 +240,7 @@ export function SweepChart({
 
           {ticks.map((t) => (
             <g key={t}>
-              <line x1={M.l} x2={W - M.r} y1={y(t)} y2={y(t)} stroke="var(--line)" strokeWidth={1} />
+              <line x1={M.l} x2={W - M.r} y1={y(t)} y2={y(t)} stroke="var(--chart-grid)" strokeWidth={1} />
               <text x={M.l - 8} y={y(t) + 4} textAnchor="end" fontSize={10.5} fill="var(--muted)">
                 {compact(t)}
               </text>
@@ -247,9 +259,31 @@ export function SweepChart({
             </text>
           ))}
 
+          {/* Trading: finer grid (vertical lines + minor horizontal lines) */}
+          {cs.fineGrid && (
+            <g aria-hidden="true">
+              {xTicks.map((t, i) => (
+                <line key={`v${i}`} x1={x(t)} x2={x(t)} y1={M.t} y2={H - M.b} stroke="var(--chart-grid)" strokeWidth={1} />
+              ))}
+              {ticks.slice(0, -1).map((t, i) => (
+                <line
+                  key={`m${i}`}
+                  x1={M.l}
+                  x2={W - M.r}
+                  y1={y((t + ticks[i + 1]) / 2)}
+                  y2={y((t + ticks[i + 1]) / 2)}
+                  stroke="var(--chart-grid)"
+                  strokeWidth={1}
+                  strokeDasharray="2 3"
+                  opacity={0.6}
+                />
+              ))}
+            </g>
+          )}
+
           {/* the d: path() style lets the curve glide to its new shape (CSS transition in index.css) */}
-          <path className="wi-curve" style={{ d: `path('${area}')` }} d={area} fill="var(--pos)" fillOpacity={0.22} clipPath={`url(#${uid}a)`} />
-          <path className="wi-curve" style={{ d: `path('${area}')` }} d={area} fill="var(--neg)" fillOpacity={0.25} clipPath={`url(#${uid}b)`} />
+          <path className="wi-curve" style={{ d: `path('${area}')` }} d={area} fill="var(--chart-fill-profit)" clipPath={`url(#${uid}a)`} />
+          <path className="wi-curve" style={{ d: `path('${area}')` }} d={area} fill="var(--chart-fill-loss)" clipPath={`url(#${uid}b)`} />
           <line x1={M.l} x2={W - M.r} y1={y0} y2={y0} stroke="var(--muted)" strokeWidth={1} strokeDasharray="4 3" />
 
           {/* baseline: the same sweep with the other variable at its entered value */}
@@ -269,42 +303,76 @@ export function SweepChart({
             style={{ d: `path('${line}')` }}
             d={line}
             fill="none"
-            stroke="var(--accent-ink)"
-            strokeWidth={2.5}
-            strokeLinejoin="round"
-            strokeLinecap="round"
+            stroke="var(--chart-line)"
+            strokeWidth={cs.stepped ? 3 : 2.5}
+            strokeLinejoin={cs.stepped ? 'miter' : 'round'}
+            strokeLinecap={cs.stepped ? 'square' : 'round'}
           />
 
           {/* break-even / max rate on the zero line */}
           {beInRange && (
-            <circle cx={x(breakEven)} cy={y0} r={4} fill="var(--surface)" stroke="var(--muted)" strokeWidth={2} />
+            cs.square ? (
+              <rect x={x(breakEven) - 4} y={y0 - 4} width={8} height={8} fill="var(--surface)" stroke="var(--muted)" strokeWidth={2} />
+            ) : (
+              <circle cx={x(breakEven)} cy={y0} r={4} fill="var(--surface)" stroke="var(--muted)" strokeWidth={2} />
+            )
           )}
 
           {/* your entered rate, on the baseline curve */}
           <line x1={x(cur)} x2={x(cur)} y1={M.t} y2={H - M.b} stroke="var(--accent-ink)" strokeWidth={1} strokeDasharray="3 3" opacity={0.6} />
-          <circle cx={x(cur)} cy={y(p0)} r={5} fill="var(--accent)" stroke="var(--surface)" strokeWidth={2.5} />
+          {cs.square ? (
+            <rect x={x(cur) - 5} y={y(p0) - 5} width={10} height={10} fill="var(--accent)" stroke="var(--surface)" strokeWidth={2.5} />
+          ) : (
+            <circle cx={x(cur)} cy={y(p0)} r={5} fill="var(--accent)" stroke="var(--surface)" strokeWidth={2.5} />
+          )}
 
           {/* hover ghost */}
           {showGhost && hv !== null && (
             <g pointerEvents="none">
               <line x1={x(hv)} x2={x(hv)} y1={M.t} y2={H - M.b} stroke="var(--ink)" strokeWidth={1} opacity={0.25} />
-              <circle cx={x(hv)} cy={y(profitHeld(hv))} r={4.5} fill="var(--surface)" stroke="var(--ink)" strokeWidth={2} opacity={0.6} />
+              {cs.square ? (
+                <rect x={x(hv) - 4.5} y={y(profitHeld(hv)) - 4.5} width={9} height={9} fill="var(--surface)" stroke="var(--ink)" strokeWidth={2} opacity={0.6} />
+              ) : (
+                <circle cx={x(hv)} cy={y(profitHeld(hv))} r={4.5} fill="var(--surface)" stroke="var(--ink)" strokeWidth={2} opacity={0.6} />
+              )}
+            </g>
+          )}
+
+          {/* Trading: crosshair that follows the pointer (horizontal line at the profit under the cursor) */}
+          {cs.crosshair && hv !== null && (
+            <g pointerEvents="none">
+              <line x1={M.l} x2={W - M.r} y1={y(profitHeld(hv))} y2={y(profitHeld(hv))} stroke="var(--ink)" strokeWidth={1} strokeDasharray="3 3" opacity={0.45} />
+              <line x1={x(hv)} x2={x(hv)} y1={M.t} y2={H - M.b} stroke="var(--ink)" strokeWidth={1} strokeDasharray="3 3" opacity={0.45} />
             </g>
           )}
 
           {/* scenario marker: x follows the pointer instantly, y glides when the other variable moves */}
           <g transform={`translate(${x(sv)} 0)`} pointerEvents="none">
             <line y1={M.t} y2={H - M.b} stroke="var(--ink)" strokeWidth={1.25} opacity={0.55} />
-            <circle
-              className="wi-dot"
-              r={6}
-              cx={0}
-              cy={0}
-              style={{ transform: `translateY(${y(profit)}px)` }}
-              fill={thumb}
-              stroke="var(--surface)"
-              strokeWidth={2.5}
-            />
+            {cs.square ? (
+              <rect
+                className="wi-dot"
+                x={-6}
+                y={-6}
+                width={12}
+                height={12}
+                style={{ transform: `translateY(${y(profit)}px)` }}
+                fill={thumb}
+                stroke="var(--surface)"
+                strokeWidth={2.5}
+              />
+            ) : (
+              <circle
+                className="wi-dot"
+                r={6}
+                cx={0}
+                cy={0}
+                style={{ transform: `translateY(${y(profit)}px)` }}
+                fill={thumb}
+                stroke="var(--surface)"
+                strokeWidth={2.5}
+              />
+            )}
           </g>
         </svg>
 
@@ -314,7 +382,10 @@ export function SweepChart({
             style={{ left: tipLeft }}
           >
             <div className="text-muted">At {cfg.fmtRate(hv)}</div>
-            <div className={`text-sm font-bold ${tone(profitHeld(hv))}`}>{takaSigned(profitHeld(hv))}</div>
+            <div className={`num text-sm font-bold ${tone(profitHeld(hv))}`}>
+              <Glyph value={profitHeld(hv)} />
+              {takaSigned(profitHeld(hv))}
+            </div>
             <div className="text-[11px] text-muted">
               {cfg.heldName} {cfg.fmtHeld(other)}
             </div>

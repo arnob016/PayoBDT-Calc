@@ -1,78 +1,96 @@
 ﻿@import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ---------- Design tokens ---------- */
+/*
+ * Components never hardcode colours: they use these utilities, which read the theme tokens.
+ * The tokens themselves (bg, surface, surface-2, border, text, text-muted, accent, accent-contrast,
+ * profit, loss, warning, focus-ring, chart-*, radius-*, shadow-card, font-*) are defined per theme
+ * in themes.css as html[data-theme="..."] blocks.
+ */
 @theme inline {
-  --font-sans: "Inter Variable", Inter, "Noto Sans Bengali", "Nirmala UI", system-ui, sans-serif;
+  --font-sans: var(--font-body);
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
-  --color-line: var(--line);
-  --color-ink: var(--ink);
-  --color-muted: var(--muted);
+  --color-line: var(--border);
+  --color-ink: var(--text);
+  --color-muted: var(--text-muted);
+  --color-page-ink: var(--page-ink);
+  --color-page-muted: var(--page-muted);
   --color-accent: var(--accent);
+  --color-accent-contrast: var(--accent-contrast);
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
-  --color-pos: var(--pos);
-  --color-pos-soft: var(--pos-soft);
-  --color-neg: var(--neg);
-  --color-neg-soft: var(--neg-soft);
-  --shadow-card: var(--shadow);
+  --color-pos: var(--profit);
+  --color-pos-soft: var(--profit-soft);
+  --color-neg: var(--loss);
+  --color-neg-soft: var(--loss-soft);
+  --color-warning: var(--warning);
 }
 
-:root {
-  color-scheme: light;
-  --bg: #f8fafc;
-  --surface: #ffffff;
-  --surface-2: #f1f5f9;
-  --line: #e2e8f0;
-  --ink: #0f172a;
-  --muted: #475569;
-  --accent: #4f46e5; /* indigo-600, white text = 6.3:1 */
-  --accent-ink: #4338ca; /* accent used as text */
-  --accent-soft: #eef2ff;
-  --pos: #047857;
-  --pos-soft: #ecfdf5;
-  --pos-glow: #10b981;
-  --neg: #b91c1c;
-  --neg-soft: #fef2f2;
-  --neg-glow: #ef4444;
-  --shadow: 0 1px 2px rgb(15 23 42 / 0.05), 0 4px 16px -4px rgb(15 23 42 / 0.08);
+@utility shadow-card {
+  box-shadow: var(--shadow-card);
 }
-:root.dark {
-  color-scheme: dark;
-  --bg: #0b1120;
-  --surface: #0f172a;
-  --surface-2: #1e293b;
-  --line: #263248;
-  --ink: #e2e8f0;
-  --muted: #94a3b8;
-  --accent: #6366f1;
-  --accent-ink: #a5b4fc;
-  --accent-soft: #1e1b4b;
-  --pos: #34d399;
-  --pos-soft: #052e22;
-  --neg: #f87171;
-  --neg-soft: #3b0d0d;
-  --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -8px rgb(0 0 0 / 0.5);
+@utility font-display {
+  font-family: var(--font-display);
+}
+/* numbers: inputs, chart labels and anything marked .num */
+@utility num {
+  font-family: var(--font-numeric);
+}
+
+/* Aliases kept so older code (and the charts) can keep using the short names */
+:root {
+  --line: var(--border);
+  --ink: var(--text);
+  --muted: var(--text-muted);
+  --pos: var(--profit);
+  --neg: var(--loss);
+  --pos-soft: var(--profit-soft);
+  --neg-soft: var(--loss-soft);
+  --pos-glow: var(--profit-glow);
+  --neg-glow: var(--loss-glow);
+  --chart-fill-profit: color-mix(in srgb, var(--profit) var(--fill-a, 22%), transparent);
+  --chart-fill-loss: color-mix(in srgb, var(--loss) var(--fill-a, 25%), transparent);
 }
 
 html {
   background: var(--bg);
 }
 body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font-sans);
+  background-color: var(--bg);
+  background-image: var(--bg-image, none);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: var(--font-body);
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum", "cv11";
   -webkit-font-smoothing: antialiased;
   transition: background-color 200ms ease, color 200ms ease;
 }
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+}
+input[type="text"],
+svg text,
+.num {
+  font-family: var(--font-numeric);
+}
+
+/*
+ * Radii come from the theme. These plain rules sit outside Tailwind's layers, so they win over
+ * the utilities and every theme can reshape the whole UI (Adventure goes fully square).
+ */
+.rounded { border-radius: var(--radius-xs); }
+.rounded-md { border-radius: var(--radius-xs); }
+.rounded-lg { border-radius: var(--radius-sm); }
+.rounded-xl { border-radius: var(--radius-md); }
+.rounded-2xl { border-radius: var(--radius-lg); }
+.rounded-full { border-radius: var(--radius-pill); }
 
 @layer base {
   :focus-visible {
-    outline: 2px solid var(--accent-ink);
+    outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
   }
 }
@@ -92,7 +110,8 @@ body {
 }
 
 /* ---------- Scenario slider (sits under a sensitivity chart) ----------
-   --track: gradient split at break-even, --thumb: colour by profit sign, set from React. */
+   --track: gradient split at break-even, --thumb: colour by profit sign, both set from React.
+   Shape tokens (--track-h, --thumb-size, --radius-pill, --radius-thumb) come from the theme. */
 .sweep-range {
   -webkit-appearance: none;
   appearance: none;
@@ -101,45 +120,45 @@ body {
   cursor: pointer;
 }
 .sweep-range::-webkit-slider-runnable-track {
-  height: 8px;
-  border-radius: 9999px;
+  height: var(--track-h);
+  border-radius: var(--radius-pill);
   background: var(--track);
 }
 .sweep-range::-moz-range-track {
-  height: 8px;
-  border-radius: 9999px;
+  height: var(--track-h);
+  border-radius: var(--radius-pill);
   background: var(--track);
 }
 .sweep-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   box-sizing: border-box;
-  width: 24px;
-  height: 24px;
-  margin-top: -8px;
-  border-radius: 9999px;
+  width: var(--thumb-size);
+  height: var(--thumb-size);
+  margin-top: calc((var(--track-h) - var(--thumb-size)) / 2);
+  border-radius: var(--radius-thumb);
   background: var(--thumb);
   border: 3px solid var(--surface);
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.4);
+  box-shadow: var(--thumb-shadow);
   transition: background-color 150ms ease, box-shadow 150ms ease;
 }
 .sweep-range::-moz-range-thumb {
   box-sizing: border-box;
-  width: 24px;
-  height: 24px;
-  border-radius: 9999px;
+  width: var(--thumb-size);
+  height: var(--thumb-size);
+  border-radius: var(--radius-thumb);
   background: var(--thumb);
   border: 3px solid var(--surface);
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.4);
+  box-shadow: var(--thumb-shadow);
   transition: background-color 150ms ease, box-shadow 150ms ease;
 }
 .sweep-range:focus-visible {
   outline: none;
 }
 .sweep-range:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 3px var(--accent-ink);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 .sweep-range:focus-visible::-moz-range-thumb {
-  box-shadow: 0 0 0 3px var(--accent-ink);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 /* What-if charts: curves and the scenario dot glide for ~120ms when the other variable moves */

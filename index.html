@@ -6,12 +6,21 @@
     <meta name="color-scheme" content="light dark" />
     <title>Payoneer → USDT → BDT Calculator</title>
     <script>
-      // Apply the theme before first paint (stored choice, else system preference).
-      try {
-        var t = localStorage.getItem('payoneer-theme');
-        var dark = t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-        document.documentElement.classList.toggle('dark', dark);
-      } catch (e) {}
+      // Apply the theme before first paint: the saved theme if it is valid, otherwise the OS preference.
+      // Keep this id list in sync with src/lib/theme.ts (a unit test checks it).
+      (function () {
+        var IDS = ['light', 'dark', 'adventure', 'trainer', 'cinematic', 'trading', 'futuristic'];
+        var t = null;
+        try { t = localStorage.getItem('payoneer-theme'); } catch (e) {}
+        if (IDS.indexOf(t) === -1) {
+          var dark = false;
+          try { dark = matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) {}
+          t = dark ? 'dark' : 'light';
+        }
+        var root = document.documentElement;
+        root.setAttribute('data-theme', t);
+        if (t !== 'light' && t !== 'trainer') root.classList.add('dark');
+      })();
     </script>
   </head>
   <body>

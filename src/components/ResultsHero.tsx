@@ -1,5 +1,6 @@
 import type { Result } from '../lib/calc'
 import { fmt, pctSigned, taka, takaSigned } from '../lib/format'
+import { Glyph } from './Glyph'
 import { useCountUp } from '../hooks/useCountUp'
 
 export type Tone = 'pos' | 'neg' | 'neutral'
@@ -110,15 +111,17 @@ export function ResultsHero({ r, valid }: { r: Result; valid: boolean }) {
         <div className="mt-2 flex items-end justify-between gap-3 lg:mt-1">
           <div
             aria-hidden="true"
-            className={`t-fast text-[2rem] font-bold leading-none tracking-tight sm:text-4xl lg:text-5xl ${TONE_TEXT[tone]} ${valid ? '' : 'opacity-50'}`}
+            className={`hero-num num t-fast text-[2rem] font-bold leading-none tracking-tight sm:text-4xl lg:text-5xl ${TONE_TEXT[tone]} ${valid ? '' : 'opacity-50'}`}
           >
+            <Glyph value={valid ? animated : 0} />
             {shownSign}
             {taka(animated)}
           </div>
           <span
             aria-hidden="true"
-            className={`t-fast mb-0.5 shrink-0 rounded-lg px-2 py-1 text-sm font-semibold ${TONE_BADGE[tone]}`}
+            className={`num t-fast mb-0.5 shrink-0 rounded-lg px-2 py-1 text-sm font-semibold ${TONE_BADGE[tone]}`}
           >
+            {valid && <Glyph value={r.profitPct} />}
             {r.profitPct === null ? '—' : pctSigned(r.profitPct)}
             <span className="ml-1 hidden font-normal opacity-80 sm:inline">vs direct</span>
           </span>

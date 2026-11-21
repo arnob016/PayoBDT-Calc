@@ -4,7 +4,7 @@ import { ChevronIcon } from './icons'
 
 interface MiniOption<T extends string> {
   value: T
-  label: string
+  label: ReactNode
   /** accessible name and tooltip */
   aria: string
   /** classes for the selected state */
@@ -89,13 +89,21 @@ export function SignToggle({
       options={[
         {
           value: 'profit',
-          label: '+ Profit',
+          label: (
+            <>
+              +<span className="sign-word"> Profit</span>
+            </>
+          ),
           aria: `${label}: count as profit (adds)`,
           on: 'bg-pos-soft text-pos ring-1 ring-pos/40',
         },
         {
           value: 'loss',
-          label: '− Loss',
+          label: (
+            <>
+              −<span className="sign-word"> Loss</span>
+            </>
+          ),
           aria: `${label}: count as loss (subtracts)`,
           on: 'bg-neg-soft text-neg ring-1 ring-neg/40',
         },
@@ -154,7 +162,7 @@ export function Accordion({
         <span className="flex items-center gap-2">
           {title}
           <span
-            className={`t-fast grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1.5 text-[11px] font-bold text-white ${
+            className={`t-fast grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1.5 text-[11px] font-bold text-accent-contrast ${
               count > 0 ? 'scale-100 opacity-100' : 'scale-75 opacity-0'
             }`}
             aria-label={count > 0 ? `${count} set` : undefined}
@@ -204,7 +212,7 @@ export function PresetChips({
             type="button"
             aria-pressed={active}
             onClick={() => onPick(String(p))}
-            className={`t-fast h-8 rounded-full border text-xs font-medium lg:h-7 ${
+            className={`num t-fast h-8 rounded-full border text-xs font-medium lg:h-7 ${
               active
                 ? 'border-accent bg-accent-soft text-accent-ink'
                 : 'border-line bg-surface text-muted hover:border-accent/50 hover:text-ink'

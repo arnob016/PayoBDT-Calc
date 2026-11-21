@@ -11,6 +11,7 @@ import {
   type FormState,
 } from './lib/form'
 import { useTheme } from './hooks/useTheme'
+import { Ticker } from './components/Ticker'
 import { useMediaQuery } from './hooks/useMediaQuery'
 import { Header } from './components/Header'
 import { ResultsHero } from './components/ResultsHero'
@@ -38,7 +39,7 @@ import {
 } from './lib/scenarios'
 
 export default function App() {
-  const { theme, toggle } = useTheme()
+  const { theme, choose } = useTheme()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
   // Lock the page to the viewport only when there is enough height; short windows scroll normally.
   const fixed = useMediaQuery('(min-width: 1280px) and (min-height: 840px)')
@@ -194,7 +195,8 @@ export default function App() {
           fixed ? 'h-dvh overflow-hidden' : 'min-h-dvh pb-6'
         }`}
       >
-        <Header theme={theme} onToggle={toggle} />
+        <Header theme={theme} onChoose={choose} />
+        {theme === 'trading' && <Ticker inputs={calcIn} result={shown} />}
         <div
           className={`grid grid-cols-12 gap-4 ${fixed ? 'min-h-0 flex-1 grid-rows-[minmax(0,1fr)] pb-4' : ''}`}
         >
@@ -219,7 +221,8 @@ export default function App() {
 
   return (
     <div className="mx-auto min-h-dvh max-w-[1100px] px-4 pb-16">
-      <Header theme={theme} onToggle={toggle} />
+      <Header theme={theme} onChoose={choose} />
+        {theme === 'trading' && <Ticker inputs={calcIn} result={shown} />}
       <div className="space-y-4">
         <div className="sticky top-0 z-20 -mx-4 bg-bg/90 px-4 py-2 backdrop-blur">{hero}</div>
         {inputs}

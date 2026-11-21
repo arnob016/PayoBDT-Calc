@@ -94,7 +94,7 @@ function FlowVertical({ steps }: { steps: Step[] }) {
             <span
               aria-hidden="true"
               className={`absolute left-0 top-1 grid h-6 w-6 place-items-center rounded-full border text-[11px] font-bold ${
-                last ? 'border-accent bg-accent text-white' : 'border-line bg-surface-2 text-muted'
+                last ? 'border-accent bg-accent text-accent-contrast' : 'border-line bg-surface-2 text-muted'
               }`}
             >
               {i + 1}
@@ -134,24 +134,22 @@ function FlowTiles({ steps }: { steps: Step[] }) {
               last ? 'border-accent/40 bg-accent-soft' : 'border-line bg-surface-2'
             }`}
           >
-            <div className="flex items-center gap-1.5 text-xs text-muted">
+            <div className="flex items-start gap-1.5 text-xs leading-4 text-muted">
               <span
                 aria-hidden="true"
                 className={`grid h-4 w-4 shrink-0 place-items-center rounded-full text-[10px] font-bold ${
-                  last ? 'bg-accent text-white' : 'bg-line text-muted'
+                  last ? 'bg-accent text-accent-contrast' : 'bg-line text-muted'
                 }`}
               >
                 {i + 1}
               </span>
-              <span className="truncate" title={s.label}>
-                {s.label}
-              </span>
+              <span className="min-w-0">{s.label}</span>
             </div>
-            <div className="mt-1 truncate text-base font-bold leading-tight lg:text-lg">
+            <div className="num mt-1 truncate text-base font-bold leading-tight lg:text-lg">
               {s.value}
               <span className="ml-1 text-[11px] font-medium text-muted">{s.unit}</span>
             </div>
-            <p className="mt-0.5 min-h-7 text-[11px] leading-[14px] text-muted">{s.note ?? ''}</p>
+            <p className="mt-0.5 min-h-[14px] text-[11px] leading-[14px] text-muted">{s.note ?? ''}</p>
             <span
               aria-hidden="true"
               className={`${arrow} absolute -right-[13px] top-1/2 z-10 h-[18px] w-[18px] -translate-y-1/2 place-items-center rounded-full border border-line bg-surface text-muted`}
@@ -183,7 +181,7 @@ function Gauge({ current, breakEven }: { current: number; breakEven: number }) {
     >
       <div className="relative h-7">
         <span
-          className="absolute -top-0.5 -translate-x-1/2 whitespace-nowrap rounded-md bg-ink px-1.5 py-0.5 text-[11px] font-semibold text-bg transition-[left] duration-300 ease-out"
+          className="absolute -top-0.5 -translate-x-1/2 whitespace-nowrap rounded-md bg-ink px-1.5 py-0.5 text-[11px] font-semibold text-surface transition-[left] duration-300 ease-out"
           style={{ left: `${labelPos}%` }}
         >
           You {taka(current, 2)}
@@ -241,7 +239,7 @@ export function Breakdown({
           <div>
             <div className="flex items-baseline justify-between gap-3 xl:block">
               <span className="text-sm text-muted xl:block xl:text-xs">Break-even sell rate</span>
-              <span className="text-lg font-bold">
+              <span className="num text-lg font-bold">
                 {hasBE ? taka(be, 2) : '—'}
                 <span className="ml-1 text-xs font-medium text-muted">/USDT</span>
               </span>

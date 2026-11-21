@@ -129,7 +129,7 @@ export function InputsPanel({
                 className="mt-0.5 flex h-11 items-center justify-between rounded-xl bg-surface-2 px-3 lg:h-10"
                 aria-live="polite"
               >
-                <span className="text-base font-bold lg:text-[15px]">৳{fmt(effective, 2)}</span>
+                <span className="num text-base font-bold lg:text-[15px]">৳{fmt(effective, 2)}</span>
                 <span className="text-[11px] text-muted">
                   {fmt(num(form.usdtToBdtRate), 2)} {chargeSign} {fmt(num(form.bdtFeeProfit), 2)}
                 </span>
@@ -177,7 +177,7 @@ export function InputsPanel({
           type="button"
           onClick={onSave}
           aria-label="Save scenario"
-          className="t-fast flex h-10 items-center justify-center gap-1.5 rounded-xl bg-accent px-2 text-[13px] font-semibold text-white hover:brightness-110"
+          className="t-fast flex h-10 items-center justify-center gap-1.5 rounded-xl bg-accent px-2 text-[13px] font-semibold text-accent-contrast hover:brightness-110"
         >
           <BookmarkIcon className="h-4 w-4" />
           <span>

@@ -13,7 +13,7 @@ export function Toast({ message, onDone }: { message: string | null; onDone: () 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-4" role="status" aria-live="polite">
       {message && (
-        <div key={message} className="toast-in flex items-center gap-2 rounded-xl bg-ink px-4 py-3 text-sm font-medium text-bg shadow-card">
+        <div key={message} className="toast-in flex items-center gap-2 rounded-xl bg-ink px-4 py-3 text-sm font-medium text-surface shadow-card">
           <CheckIcon className="h-4 w-4" /> {message}
         </div>
       )}
