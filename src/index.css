@@ -1,0 +1,101 @@
+﻿@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------- Design tokens ---------- */
+@theme inline {
+  --font-sans: "Inter Variable", Inter, "Noto Sans Bengali", "Nirmala UI", system-ui, sans-serif;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-pos: var(--pos);
+  --color-pos-soft: var(--pos-soft);
+  --color-neg: var(--neg);
+  --color-neg-soft: var(--neg-soft);
+  --shadow-card: var(--shadow);
+}
+
+:root {
+  color-scheme: light;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-2: #f1f5f9;
+  --line: #e2e8f0;
+  --ink: #0f172a;
+  --muted: #475569;
+  --accent: #4f46e5; /* indigo-600, white text = 6.3:1 */
+  --accent-ink: #4338ca; /* accent used as text */
+  --accent-soft: #eef2ff;
+  --pos: #047857;
+  --pos-soft: #ecfdf5;
+  --pos-glow: #10b981;
+  --neg: #b91c1c;
+  --neg-soft: #fef2f2;
+  --neg-glow: #ef4444;
+  --shadow: 0 1px 2px rgb(15 23 42 / 0.05), 0 4px 16px -4px rgb(15 23 42 / 0.08);
+}
+:root.dark {
+  color-scheme: dark;
+  --bg: #0b1120;
+  --surface: #0f172a;
+  --surface-2: #1e293b;
+  --line: #263248;
+  --ink: #e2e8f0;
+  --muted: #94a3b8;
+  --accent: #6366f1;
+  --accent-ink: #a5b4fc;
+  --accent-soft: #1e1b4b;
+  --pos: #34d399;
+  --pos-soft: #052e22;
+  --neg: #f87171;
+  --neg-soft: #3b0d0d;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -8px rgb(0 0 0 / 0.5);
+}
+
+html {
+  background: var(--bg);
+}
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum", "cv11";
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 2px;
+  }
+}
+
+/* One shared transition for interactive surfaces (150-250ms) */
+.t-fast {
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease,
+    box-shadow 150ms ease, opacity 200ms ease, transform 150ms ease;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.toast-in {
+  animation: toast-in 200ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
