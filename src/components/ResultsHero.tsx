@@ -95,7 +95,7 @@ export function ResultsHero({ r, valid }: { r: Result; valid: boolean }) {
         }}
       />
 
-      <div className="relative p-4 lg:p-6">
+      <div className="relative p-4 lg:px-5 lg:py-3">
         <div className="flex items-center justify-between gap-3">
           <h2 id="hero-title" className="text-xs font-semibold uppercase tracking-wider text-muted">
             {label}
@@ -107,7 +107,7 @@ export function ResultsHero({ r, valid }: { r: Result; valid: boolean }) {
           </span>
         </div>
 
-        <div className="mt-3 flex items-end justify-between gap-3">
+        <div className="mt-2 flex items-end justify-between gap-3 lg:mt-1">
           <div
             aria-hidden="true"
             className={`t-fast text-[2rem] font-bold leading-none tracking-tight sm:text-4xl lg:text-5xl ${TONE_TEXT[tone]} ${valid ? '' : 'opacity-50'}`}
@@ -119,7 +119,7 @@ export function ResultsHero({ r, valid }: { r: Result; valid: boolean }) {
             aria-hidden="true"
             className={`t-fast mb-0.5 shrink-0 rounded-lg px-2 py-1 text-sm font-semibold ${TONE_BADGE[tone]}`}
           >
-            {pctSigned(r.profitPct)}
+            {r.profitPct === null ? '—' : pctSigned(r.profitPct)}
             <span className="ml-1 hidden font-normal opacity-80 sm:inline">vs direct</span>
           </span>
         </div>
@@ -127,11 +127,11 @@ export function ResultsHero({ r, valid }: { r: Result; valid: boolean }) {
         {/* Screen readers get the settled value, not every animation frame */}
         <p className="sr-only" aria-live="polite" role="status">
           {valid
-            ? `${label}: ${takaSigned(r.profitBdt)} BDT, ${pctSigned(r.profitPct)} versus direct. ${verdictText(tone, r.profitBdt, valid)}.`
+            ? `${label}: ${takaSigned(r.profitBdt)} BDT, ${r.profitPct === null ? 'no percentage available' : `${pctSigned(r.profitPct)} versus direct`}. ${verdictText(tone, r.profitBdt, valid)}.`
             : 'Some inputs are invalid. Fix the highlighted fields.'}
         </p>
 
-        <div className="mt-4 border-t border-line pt-3">
+        <div className="mt-3 border-t border-line pt-3 lg:mt-2 lg:pt-2.5">
           <CompareBars direct={r.bdtDirect} viaUsdt={r.bdtViaUsdt} tone={tone} />
           <p className="mt-2 hidden text-[11px] leading-snug text-muted sm:block lg:hidden">
             Bars share one zero-based scale; the coloured tail is the difference ({fmt(Math.abs(r.bdtViaUsdt - r.bdtDirect), 0)} BDT).

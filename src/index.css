@@ -91,6 +91,67 @@ body {
   animation: toast-in 200ms ease-out both;
 }
 
+/* ---------- Scenario slider (sits under a sensitivity chart) ----------
+   --track: gradient split at break-even, --thumb: colour by profit sign, set from React. */
+.sweep-range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  margin: 0;
+  cursor: pointer;
+}
+.sweep-range::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--track);
+}
+.sweep-range::-moz-range-track {
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--track);
+}
+.sweep-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+  margin-top: -8px;
+  border-radius: 9999px;
+  background: var(--thumb);
+  border: 3px solid var(--surface);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.4);
+  transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+.sweep-range::-moz-range-thumb {
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  background: var(--thumb);
+  border: 3px solid var(--surface);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.4);
+  transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+.sweep-range:focus-visible {
+  outline: none;
+}
+.sweep-range:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px var(--accent-ink);
+}
+.sweep-range:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 3px var(--accent-ink);
+}
+
+/* What-if charts: curves and the scenario dot glide for ~120ms when the other variable moves */
+@media (prefers-reduced-motion: no-preference) {
+  .wi-curve {
+    transition: d 120ms ease-out;
+  }
+  .wi-dot {
+    transition: transform 120ms ease-out, fill 150ms;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
